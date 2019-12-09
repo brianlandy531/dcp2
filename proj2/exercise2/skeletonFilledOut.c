@@ -9,6 +9,8 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include "encap.h"
+#include <arpa/inet.h>
+
 
 u_short ush_endian_swp(u_short p);
 unsigned int uint_endian_swp(unsigned int p);
@@ -37,7 +39,6 @@ main(int argc,char **argv)
 	
 
 
-
 	if(argc<2) 
 		{
 		printf("ERROR: Too few input arguments\n");
@@ -50,6 +51,8 @@ main(int argc,char **argv)
 		return 0;
 		}
 	InLen=filedat.st_size;
+
+
 
 	if((fp=fopen("outdata.txt", "w")) == NULL) {
 		printf("Cannot open outdata.txt file.\n");
@@ -76,7 +79,11 @@ main(int argc,char **argv)
 //	currpos = ftello64(InRaw);
 	currpos = ftello(InRaw);
 
+
+
 	while (currpos < InLen){
+
+
 
 		pcktcnt++;
 		//currpos = ftello64(InRaw);
@@ -95,15 +102,31 @@ main(int argc,char **argv)
 			/* Simple example code */
 			//fprintf(fp, "packet: %d, type: %u \n",pcktcnt,ethernet->ether_type);
 
-			uint8_t seqNumRet = 0;
-			uint8_t ackNumRet = 0;
+
+
+			unsigned int seqNumRet = 0;
+			unsigned int ackNumRet = 0;
 			seqNumRet = uint_endian_swp(tcp->th_seq);
 			ackNumRet = uint_endian_swp(tcp->th_ack);
 
+			char addressSrc[20];
+			struct in_addr srcAddrStruct;
+
+			srcAddrStruct.s_addr = ethernet->ether_shost;
+			strcpy(addressSrc, inet_ntoa(srcAddrStruct));
 
 
-			fprintf(fp, "packet: %d, Source IPv4: %u and port:%hu, Dest IPv4: %u and Port: %hu, Seq Num swap: %u, Ack Num: %u  \n", 
-				pcktcnt, ethernet->ether_shost, tcp->th_sport, ethernet->ether_dhost, tcp->th_dport, seqNumRet, ackNumRet);
+			char addressDst[20];
+			struct in_addr dstAddrStruct;
+
+			dstAddrStruct.s_addr = ethernet->ether_dhost;
+			strcpy(addressDst, inet_ntoa(dstAddrStruct));
+
+
+
+
+			fprintf(fp, "packet: %d, Source IPv4: %s and port:%hu, Dest IPv4: %s and Port: %hu, Seq Num swap: %u, Ack Num: %u  \n", 
+				pcktcnt, addressSrc, tcp->th_sport, addressDst, ntohs(tcp->th_dport), ntohs(seqNumRet), ntohs(ackNumRet));
 
 			printf("%d\n", sizeof(u_short));
 			printf("%d\n", sizeof(uint16_t));
@@ -157,19 +180,6 @@ unsigned int uint_endian_swp(unsigned int p)
 	return res;
 }
 
-unsigned int uint_endian_swp(unsigned int p)
-{
-    	unsigned int res;
-    	char *h = (char *)(&p);
-    	char *hr = (char *)(&res);
-
-	hr[0]=h[3];
-	hr[1]=h[2];
-	hr[2]=h[1];	
-	hr[3]=h[0];
-
-	return res;
-}
 
 
 int isgetTCPIP(BYTE *pcktbuf, u_int *size_ip, u_int *size_tcp,FILE *fp)

@@ -9,7 +9,7 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include "encap.h"
-#include <arpa/inet.h>
+
 
 
 u_short ush_endian_swp(u_short p);
@@ -25,8 +25,9 @@ char *payload; /* Packet payload */
 
 main(int argc,char **argv)
 {
-	unsigned int addressSrc;
-	FILE *InRaw,*fp;
+	FILE *InRaw,*fp, *payloadData, *transferred;
+
+
 	struct stat filedat;
 	off_t InLen, currpos;
 	
@@ -60,6 +61,17 @@ main(int argc,char **argv)
 		return(0);
 	  }
 
+	  if((transferred=fopen("transfer.txt", "w")) == NULL) {
+		printf("Cannot open outdata.txt file.\n");
+		return(0);
+	  }
+
+
+	  if((payloadData=fopen("payloadData.txt", "w")) == NULL) {
+		printf("Cannot open payloadData.txt file.\n");
+		return(0);
+	  }
+
 	//InRaw=fopen64(*(argv+1),"rb");
 	InRaw=fopen(*(argv+1),"rb");
 
@@ -80,7 +92,9 @@ main(int argc,char **argv)
 //	currpos = ftello64(InRaw);
 	currpos = ftello(InRaw);
 
+	int firstGot = 0;
 
+int totalSize = 0;
 
 	while (currpos < InLen){
 
@@ -115,7 +129,8 @@ main(int argc,char **argv)
 			ackNumRet = uint_endian_swp(tcp->th_ack);
 			//ackNumRet = (tcp->th_ack);
 
-			
+			char srcString[20];
+			char dstString[20];
 
 			BYTE addressSrc[4];
 			memcpy(&addressSrc[0], &(ip->ip_src.S_un.S_un_b.s_b1), sizeof(BYTE));
@@ -134,23 +149,71 @@ main(int argc,char **argv)
 
 			fprintf(fp, "%u.%u.%u.%u ", addressSrc[0], addressSrc[1], addressSrc[2], addressSrc[3]);
 
+			sprintf(srcString, "%u.%u.%u.%u", addressSrc[0], addressSrc[1], addressSrc[2], addressSrc[3]);
+
 			fprintf(fp,"and port: %u, Dest IPv4: ", ush_endian_swp(tcp->th_sport));
 
 			fprintf(fp, "%u.%u.%u.%u ", addressDst[0], addressDst[1], addressDst[2], addressDst[3]);
 
+			sprintf(dstString, "%u.%u.%u.%u", addressDst[0], addressDst[1], addressDst[2], addressDst[3]);
+
 
 			fprintf(fp,"and Port: %u, Seq Num: %u, Ack Num: %u  \n", ush_endian_swp(tcp->th_dport), seqNumRet, ackNumRet);
+
+
+			unsigned short payloadSize = ush_endian_swp(ip->ip_len);
+
+			payloadSize -= size_ip;
+
+			payloadSize -= size_tcp;
+
+totalSize += payloadSize;
+
+			if(payloadSize !=0) //strcmp("129.21.27.161", srcString)==0 && strcmp("129.21.27.12", dstString)==0)
+			{
+
+
+	//				fprintf(payloadData, "%s\n", payload);	
+
+
+
+
+
+			
+				
+					firstGot = seqNumRet;
+					fprintf(payloadData, "packet: %d, Seq Num: %u, PLoad Size: %hu\n", 
+						pcktcnt, seqNumRet, payloadSize);
+
+
+					for(int iter =0; iter<payloadSize; iter++)
+					{
+					
+						fprintf(transferred, "%c", *(payload+iter));
+					}
+					//first
+
+				
+
+
+
+			}
+			
+
+
+
 
 
 		}  // isgetTCPIP
 
 	} //while currpos < InLen
 
-
+	fprintf(payloadData, "Total file transferred: %d\n", totalSize);
 
 	fclose(InRaw);
 	fclose(fp);
-
+	fclose(payloadData);
+	fclose(transferred);
 	return(0);
 
 }
@@ -208,6 +271,8 @@ int isgetTCPIP(BYTE *pcktbuf, u_int *size_ip, u_int *size_tcp,FILE *fp)
 					return 0;
 				}
 				payload = (u_char *)(pcktbuf + SIZE_ETHERNET + *size_ip + *size_tcp);
+
+				printf("%x\n", payload);
 
 				return 1;
 			} // only TCP

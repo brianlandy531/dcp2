@@ -1,0 +1,26 @@
+packet: 35, Seq Num: 959304546, PLoad Size: 262
+packet: 37, Seq Num: 959304808, PLoad Size: 1448
+packet: 39, Seq Num: 959306256, PLoad Size: 1448
+packet: 41, Seq Num: 959307704, PLoad Size: 5792
+packet: 43, Seq Num: 959313496, PLoad Size: 5792
+packet: 45, Seq Num: 959319288, PLoad Size: 1764
+packet: 47, Seq Num: 959321052, PLoad Size: 5792
+packet: 49, Seq Num: 959326844, PLoad Size: 4344
+packet: 51, Seq Num: 959331188, PLoad Size: 4344
+packet: 53, Seq Num: 959335532, PLoad Size: 4908
+packet: 55, Seq Num: 959340440, PLoad Size: 2896
+packet: 57, Seq Num: 959343336, PLoad Size: 4344
+packet: 59, Seq Num: 959347680, PLoad Size: 2896
+packet: 61, Seq Num: 959350576, PLoad Size: 4344
+packet: 63, Seq Num: 959354920, PLoad Size: 7240
+packet: 65, Seq Num: 959362160, PLoad Size: 5792
+packet: 67, Seq Num: 959367952, PLoad Size: 5792
+packet: 69, Seq Num: 959373744, PLoad Size: 5792
+packet: 71, Seq Num: 959379536, PLoad Size: 5792
+packet: 73, Seq Num: 959385328, PLoad Size: 3058
+packet: 75, Seq Num: 959388386, PLoad Size: 4344
+packet: 77, Seq Num: 959392730, PLoad Size: 4344
+packet: 79, Seq Num: 959397074, PLoad Size: 4344
+packet: 81, Seq Num: 959401418, PLoad Size: 330
+packet: 83, Seq Num: 1347951211, PLoad Size: 18
+Total file transferred: 97220
